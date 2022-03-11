@@ -134,4 +134,36 @@ contract SinglePool is ExactInput {
         require(poolAfter.token0 == poolBefore.token0 - 1);
         require(poolAfter.token1 == poolBefore.token1 + 3);
     }
+
+}
+
+contract MultiPool is ExactInput {
+
+    function testZeroToOneToTwo() public {
+        Balances memory traderBefore = getBalances(trader);
+
+        address[] memory _tokens = new address[](3);
+        _tokens[0] = address(tokens[0]);
+        _tokens[1] = address(tokens[1]);
+        _tokens[2] = address(tokens[2]);
+        exactInput(_tokens, 5, 1);
+
+        Balances memory traderAfter = getBalances(trader);
+        require(traderAfter.token0 == traderBefore.token0 - 5);
+        require(traderAfter.token2 == traderBefore.token2 + 1);
+
+    }
+
+    function testTwoToOneToZero() public {
+        Balances memory traderBefore = getBalances(trader);
+
+        address[] memory _tokens = new address[](3);
+        _tokens[0] = address(tokens[2]);
+        _tokens[1] = address(tokens[1]);
+        _tokens[2] = address(tokens[0]);
+        exactInput(_tokens, 5, 1);
+
+        Balances memory traderAfter = getBalances(trader);
+        require(traderAfter.token2 == traderBefore.token2 - 5);
+        require(traderAfter.token0 == traderBefore.token0 + 1);
 }

@@ -2,7 +2,11 @@ pragma solidity ^0.7.6;
 
 import "./utils/Test.sol";
 
+import "contracts/test/TestERC20.sol";
+
 import "contracts/SwapRouter.sol";
+import "contracts/NonfungibleTokenPositionDescriptor.sol";
+import "contracts/NonfungiblePositionManager.sol";
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-core/contracts/interfaces/IERC20Minimal.sol";
@@ -32,5 +36,36 @@ contract V3RouterFixture is Test {
         factory = IUniswapV3Factory(_factory);
 
         router = new SwapRouter(_factory, _weth9);
+    }
+}
+
+// Fixture which deploys the 3 tokens we'll use in the tests and the NFT position manager
+contract CompleteFixture is V3RouterFixture {
+    TestERC20[] tokens;
+    NonfungibleTokenPositionDescriptor nftDescriptor;
+    NonfungiblePositionManager nft;
+
+    function setUp() virtual override public {
+        super.setUp();
+
+        // deploy the 3 tokens
+        address token0 = address(new TestERC20(type(uint256).max / 2));
+        address token1 = address(new TestERC20(type(uint256).max / 2));
+        address token2 = address(new TestERC20(type(uint256).max / 2));
+        require(token0 < token1, "unexpected token ordering 1");
+        require(token2 < token1, "unexpected token ordering 2");
+        // pre-sorted manually, TODO do this properly
+        tokens.push(TestERC20(token1));
+        tokens.push(TestERC20(token2));
+        tokens.push(TestERC20(token0));
+
+        // we don't need to do the lib linking, forge deploys
+        // all libraries and does it for us
+        nftDescriptor = new NonfungibleTokenPositionDescriptor(
+            address(tokens[0]),
+            bytes32("ETH")
+        );
+
+        nft = new NonfungiblePositionManager(address(factory), address(weth9), address(nftDescriptor));
     }
 }

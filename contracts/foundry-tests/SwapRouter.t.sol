@@ -95,3 +95,43 @@ contract ExactInput is Swaps {
 		vm.stopPrank();
 	}
 }
+
+contract SinglePool is ExactInput {
+	function testZeroToOne() public {
+		address pool = factory.getPool(address(tokens[0]), address(tokens[1]), FEE_MEDIUM);
+
+		Balances memory poolBefore = getBalances(pool);
+		Balances memory traderBefore = getBalances(trader);
+
+		address[] memory _tokens = new address[](2);
+		_tokens[0] = address(tokens[0]);
+		_tokens[1] = address(tokens[1]);
+		exactInput(_tokens, 3, 1);
+
+		Balances memory poolAfter = getBalances(pool);
+		Balances memory traderAfter = getBalances(trader);
+		require(traderAfter.token0 == traderBefore.token0 - 3);
+		require(traderAfter.token1 == traderBefore.token1 + 1);
+		require(poolAfter.token0 == poolBefore.token0 + 3);
+		require(poolAfter.token1 == poolBefore.token1 - 1);
+	}
+
+	function testOneToZero() public {
+		address pool = factory.getPool(address(tokens[1]), address(tokens[0]), FEE_MEDIUM);
+
+		Balances memory poolBefore = getBalances(pool);
+		Balances memory traderBefore = getBalances(trader);
+
+		address[] memory _tokens = new address[](2);
+		_tokens[0] = address(tokens[1]);
+		_tokens[1] = address(tokens[0]);
+		exactInput(_tokens, 3, 1);
+
+		Balances memory poolAfter = getBalances(pool);
+		Balances memory traderAfter = getBalances(trader);
+		require(traderAfter.token0 == traderBefore.token0 + 1);
+		require(traderAfter.token1 == traderBefore.token1 - 3);
+		require(poolAfter.token0 == poolBefore.token0 - 1);
+		require(poolAfter.token1 == poolBefore.token1 + 3);
+	}
+}

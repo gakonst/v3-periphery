@@ -3,7 +3,7 @@ pragma solidity ^0.7.6;
 // test helpers for converting prices
 import { encodePriceSqrt } from "./utils/Math.sol";
 
-import "contracts/libraries/LiquidityAmounts.sol";
+import "../libraries/LiquidityAmounts.sol";
 
 contract GetLiquidityForAmounts {
     function testAmountsForPriceInside() public pure {

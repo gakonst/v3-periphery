@@ -1,12 +1,12 @@
 pragma solidity ^0.7.6;
+pragma abicoder v2;
 
 import "./utils/Test.sol";
+import "../test/TestERC20.sol";
 
-import "contracts/test/TestERC20.sol";
-
-import "contracts/SwapRouter.sol";
-import "contracts/NonfungibleTokenPositionDescriptor.sol";
-import "contracts/NonfungiblePositionManager.sol";
+import "../SwapRouter.sol";
+import "../NonfungibleTokenPositionDescriptor.sol";
+import "../NonfungiblePositionManager.sol";
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-core/contracts/interfaces/IERC20Minimal.sol";

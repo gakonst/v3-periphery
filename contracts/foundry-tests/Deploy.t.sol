@@ -69,3 +69,40 @@ contract CompleteFixture is V3RouterFixture {
         nft = new NonfungiblePositionManager(address(factory), address(weth9), address(nftDescriptor));
     }
 }
+
+// Final feature which sets up the user's balances & approvals
+contract SwapRouterFixture is CompleteFixture {
+    address wallet = vm.addr(1);
+    address trader = vm.addr(2);
+
+    struct Balances {
+        uint256 weth9;
+        uint256 token0;
+        uint256 token1;
+        uint256 token2;
+    }
+
+    function getBalances(address who) public returns (Balances memory) {
+        return Balances({
+            weth9: weth9.balanceOf(who),
+            token0: tokens[0].balanceOf(who),
+            token1: tokens[1].balanceOf(who),
+            token2: tokens[2].balanceOf(who)
+        });
+    }
+
+    function setUp() public virtual override {
+        super.setUp();
+
+        vm.deal(trader, 100 ether);
+        vm.deal(wallet, 100 ether);
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            tokens[i].approve(address(router), type(uint256).max);
+            tokens[i].approve(address(nft), type(uint256).max);
+            vm.prank(trader);
+            tokens[i].approve(address(router), type(uint256).max);
+            tokens[i].transfer(trader, 1_000_000 * 1 ether);
+        }
+    }
+}

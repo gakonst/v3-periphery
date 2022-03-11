@@ -1,23 +1,23 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import "./Test.sol";
-import "../../test/TestERC20.sol";
+import './Test.sol';
+import '../../test/TestERC20.sol';
 
-import "../../SwapRouter.sol";
-import "../../NonfungibleTokenPositionDescriptor.sol";
-import "../../NonfungiblePositionManager.sol";
+import '../../SwapRouter.sol';
+import '../../NonfungibleTokenPositionDescriptor.sol';
+import '../../NonfungiblePositionManager.sol';
 
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
-import "@uniswap/v3-core/contracts/interfaces/IERC20Minimal.sol";
+import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
+import '@uniswap/v3-core/contracts/interfaces/IERC20Minimal.sol';
 
 // Artifact paths for deploying from the deps folder, assumes that the command is run from
 // the project root.
-string constant v3FactoryArtifact = "node_modules/@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json";
-string constant weth9Artifact = "test/contracts/WETH9.json";
+string constant v3FactoryArtifact = 'node_modules/@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json';
+string constant weth9Artifact = 'test/contracts/WETH9.json';
 
 interface WETH9 is IERC20Minimal {
-    function deposit() payable external;
+    function deposit() external payable;
 }
 
 // Base fixture deploying V3 Factory, V3 Router and WETH9
@@ -28,7 +28,7 @@ contract V3RouterFixture is Test {
 
     // Deploys WETH9 and V3 Core's Factory contract, and then
     // hooks them on the router
-    function setUp() virtual public {
+    function setUp() public virtual {
         address _weth9 = deployCode(weth9Artifact);
         weth9 = WETH9(_weth9);
 
@@ -45,15 +45,15 @@ contract CompleteFixture is V3RouterFixture {
     NonfungibleTokenPositionDescriptor nftDescriptor;
     NonfungiblePositionManager nft;
 
-    function setUp() virtual override public {
+    function setUp() public virtual override {
         super.setUp();
 
         // deploy the 3 tokens
         address token0 = address(new TestERC20(type(uint256).max / 2));
         address token1 = address(new TestERC20(type(uint256).max / 2));
         address token2 = address(new TestERC20(type(uint256).max / 2));
-        require(token0 < token1, "unexpected token ordering 1");
-        require(token2 < token1, "unexpected token ordering 2");
+        require(token0 < token1, 'unexpected token ordering 1');
+        require(token2 < token1, 'unexpected token ordering 2');
         // pre-sorted manually, TODO do this properly
         tokens.push(TestERC20(token1));
         tokens.push(TestERC20(token2));
@@ -61,10 +61,7 @@ contract CompleteFixture is V3RouterFixture {
 
         // we don't need to do the lib linking, forge deploys
         // all libraries and does it for us
-        nftDescriptor = new NonfungibleTokenPositionDescriptor(
-            address(tokens[0]),
-            bytes32("ETH")
-        );
+        nftDescriptor = new NonfungibleTokenPositionDescriptor(address(tokens[0]), bytes32('ETH'));
 
         nft = new NonfungiblePositionManager(address(factory), address(weth9), address(nftDescriptor));
     }
@@ -83,12 +80,13 @@ contract SwapRouterFixture is CompleteFixture {
     }
 
     function getBalances(address who) public returns (Balances memory) {
-        return Balances({
-            weth9: weth9.balanceOf(who),
-            token0: tokens[0].balanceOf(who),
-            token1: tokens[1].balanceOf(who),
-            token2: tokens[2].balanceOf(who)
-        });
+        return
+            Balances({
+                weth9: weth9.balanceOf(who),
+                token0: tokens[0].balanceOf(who),
+                token1: tokens[1].balanceOf(who),
+                token2: tokens[2].balanceOf(who)
+            });
     }
 
     function setUp() public virtual override {

@@ -2,25 +2,28 @@ pragma solidity ^0.7.6;
 
 // TODO: Replace with forge-std.
 interface Vm {
-	function expectRevert(bytes memory) external;
-	function prank(address) external;
-	function startPrank(address) external;
-	function stopPrank() external;
-	function deal(address,uint256) external;
-	function addr(uint256) external returns (address);
-	function getCode(string calldata) external returns (bytes memory);
+    function expectRevert(bytes memory) external;
+
+    function prank(address) external;
+
+    function startPrank(address) external;
+
+    function stopPrank() external;
+
+    function deal(address, uint256) external;
+
+    function addr(uint256) external returns (address);
+
+    function getCode(string calldata) external returns (bytes memory);
 }
 
 contract Test {
-	Vm constant vm = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
+    Vm constant vm = Vm(address(uint160(uint256(keccak256('hevm cheat code')))));
 
-	function deployCode(string memory what)
-	public
-	returns (address addr)
-	{
-		bytes memory bytecode = vm.getCode(what);
-		assembly {
-			addr := create(0, add(bytecode, 0x20), mload(bytecode))
-		}
-	}
+    function deployCode(string memory what) public returns (address addr) {
+        bytes memory bytecode = vm.getCode(what);
+        assembly {
+            addr := create(0, add(bytecode, 0x20), mload(bytecode))
+        }
+    }
 }

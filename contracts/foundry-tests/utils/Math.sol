@@ -1,10 +1,10 @@
 pragma solidity ^0.7.6;
 
-uint256 constant PRECISION = 2 ** 96;
+uint256 constant PRECISION = 2**96;
 
 // Computes the sqrt of the u64x96 fixed point price given the AMM reserves
 function encodePriceSqrt(uint256 reserve1, uint256 reserve0) pure returns (uint160) {
-    return uint160(sqrt(reserve1 * PRECISION * PRECISION / reserve0));
+    return uint160(sqrt((reserve1 * PRECISION * PRECISION) / reserve0));
 }
 
 // Fast sqrt, taken from Solmate.

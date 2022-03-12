@@ -8,6 +8,7 @@ import './utils/Path.sol';
 
 import '../interfaces/INonfungiblePositionManager.sol';
 import '../interfaces/ISwapRouter.sol';
+import "../libraries/PoolAddress.sol";
 
 import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 
@@ -134,11 +135,9 @@ contract SinglePool is ExactInput {
         require(poolAfter.token0 == poolBefore.token0 - 1);
         require(poolAfter.token1 == poolBefore.token1 + 3);
     }
-
 }
 
 contract MultiPool is ExactInput {
-
     function testZeroToOneToTwo() public {
         Balances memory traderBefore = getBalances(trader);
 
@@ -166,4 +165,44 @@ contract MultiPool is ExactInput {
         Balances memory traderAfter = getBalances(trader);
         require(traderAfter.token2 == traderBefore.token2 - 5);
         require(traderAfter.token0 == traderBefore.token0 + 1);
+    }
+
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    function testEvents() public {
+        address[] memory _tokens = new address[](3);
+        _tokens[0] = address(tokens[0]);
+        _tokens[1] = address(tokens[1]);
+        _tokens[2] = address(tokens[2]);
+
+        PoolAddress.PoolKey memory key;
+        address addr;
+
+        // Events get emitted in the following order:
+        // 1. Pool0 -> Router
+        // 2. Trader -> Pool0
+        // 3. Pool1 -> Trader
+        // 4. Router -> Pool1
+
+        vm.expectEmit(true, true, true, true);
+        key  = PoolAddress.PoolKey(address(tokens[1]), address(tokens[0]), FEE_MEDIUM);
+        addr = PoolAddress.computeAddress(address(factory), key);
+        emit Transfer(addr, address(router), 3);
+
+        vm.expectEmit(true, true, true, true);
+        key = PoolAddress.PoolKey(address(tokens[1]), address(tokens[0]), FEE_MEDIUM);
+        addr = PoolAddress.computeAddress(address(factory), key);
+        emit Transfer(trader, addr, 5);
+
+        vm.expectEmit(true, true, true, true);
+        key = PoolAddress.PoolKey(address(tokens[1]), address(tokens[2]), FEE_MEDIUM);
+        addr = PoolAddress.computeAddress(address(factory), key);
+        emit Transfer(addr, trader, 1);
+
+        vm.expectEmit(true, true, true, true);
+        key = PoolAddress.PoolKey(address(tokens[1]), address(tokens[2]), FEE_MEDIUM);
+        addr = PoolAddress.computeAddress(address(factory), key);
+        emit Transfer(address(router), addr, 3);
+
+        exactInput(_tokens, 5, 1);
+    }
 }

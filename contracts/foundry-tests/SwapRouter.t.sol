@@ -18,6 +18,8 @@ contract Swaps is SwapRouterFixture {
 
         createPool(address(tokens[0]), address(tokens[1]));
         createPool(address(tokens[1]), address(tokens[2]));
+        createPoolWeth9(address(tokens[0]));
+        createPoolWeth9(address(tokens[1]));
     }
 
     function createPool(address tokenAddressA, address tokenAddressB) public {
@@ -44,6 +46,13 @@ contract Swaps is SwapRouterFixture {
             });
 
         nft.mint(liquidityParams);
+    }
+
+    function createPoolWeth9(address tokenAddressA) public {
+        uint256 liquidity = 1_000_000 * 1 ether;
+        (bool success, bytes memory data) = address(weth9).call{value: liquidity}(abi.encodeWithSignature("deposit()"));
+        weth9.approve(address(nft), type(uint256).max);
+        return createPool(address(weth9), tokenAddressA);
     }
 }
 

@@ -249,3 +249,37 @@ contract EthInput is ExactInput {
         require(traderAfter.token1 == traderBefore.token1 + 1);
     }
 }
+
+contract EthOutput is ExactInput {
+    function testZeroToWeth9() public {
+        address pool = factory.getPool(address(tokens[0]), address(weth9), FEE_MEDIUM);
+
+        Balances memory poolBefore = getBalances(pool);
+        Balances memory traderBefore = getBalances(trader);
+
+        address[] memory _tokens = new address[](2);
+        _tokens[0] = address(tokens[0]);
+        _tokens[1] = address(weth9);
+        exactInput(_tokens, 3, 1);
+
+        Balances memory poolAfter = getBalances(pool);
+        Balances memory traderAfter = getBalances(trader);
+
+        require(traderAfter.token0 == traderBefore.token0 - 3);
+        require(poolAfter.weth9 == poolBefore.weth9 - 1);
+        require(poolAfter.token0 == poolBefore.token0 + 3);
+    }
+
+    function testZeroToOneToWeth9() public {
+        Balances memory traderBefore = getBalances(trader);
+
+        address[] memory _tokens = new address[](3);
+        _tokens[0] = address(tokens[0]);
+        _tokens[1] = address(tokens[1]);
+        _tokens[2] = address(weth9);
+        exactInput(_tokens, 5, 1);
+
+        Balances memory traderAfter = getBalances(trader);
+        require(traderAfter.token0 == traderBefore.token0 - 5);
+    }
+}
